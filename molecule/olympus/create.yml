@@ -7,8 +7,7 @@
   #no_log: "{{ molecule_no_log }}"
   vars:
     hera_home: "{{ lookup('env', 'HERA_HOME') }}"
-      #hera_debug: "{{ lookup('env', 'HERA_DEBUG') | default(False) }}"
-    hera_debug: True
+    hera_debug: "{{ lookup('env', 'HERA_DEBUG') | default(False) }}"
     podman_image: 'localhost/molecule-slave'
     hera_molecule_slave_sshd_port: "{{ lookup('env', 'BUILD_MOLECULE_SLAVE_SSHD_PORT') | default('undefined') }}"
     workdir: "{{ lookup('env', 'WORKDIR') }}"
@@ -46,14 +45,13 @@
         BUILD_PODMAN_IMAGE: "{{ podman_image }}"
         JOB_NAME: "{{ job_name }}"
         HERA_HOSTNAME: "olympus"
-        HERA_DEBUG: "{{ lookup('env', 'HERA_DEBUG') | default('') }}"
+        HERA_DEBUG: "{{ hera_debug  }}"
         JENKINS_HOME_DIR: "/home/jenkins/current/"
         CONTAINER_UID: '0'
         CONTAINER_USERNAME: 'root'
         PUBLISHED_PORTS: "{{ hera_molecule_slave_sshd_port }}:22"
         SYSTEMD_ENABLED: True
         CONTAINER_COMMAND: '/usr/sbin/init'
-
 
     - command: >
         bash -x {{ hera_home }}/hera.sh inspect
