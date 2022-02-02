@@ -23,14 +23,7 @@
     - debug:
         var: instance_etc_hosts
 
-    - set_fact:
-        platforms: "{{ molecule_yml.platforms }}"
 
-    - set_fact:
-        molecule_yml.platforms:
-          - { name: 'instance' }
-          
-          
     - assert:
         that:
           - hera_molecule_slave_sshd_port is defined
