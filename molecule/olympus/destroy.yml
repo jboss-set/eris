@@ -2,7 +2,7 @@
 - name: Destroy
   hosts: localhost
   connection: local
-  gather_facts: false
+  gather_facts: true
   no_log: False #"{{ molecule_no_log }}"
   vars:
     hera_home: "{{ lookup('env', 'HERA_HOME') }}"
@@ -10,6 +10,9 @@
     workdir: "{{ lookup('env', 'WORKDIR') }}"
     job_name: "{{ lookup('env', 'JOB_NAME') | default('ansible') }}-slave"
   tasks:
+    - debug:
+        var: molecule_yml.platforms[0]
+
     - assert:
         that:
           - hera_home is defined
