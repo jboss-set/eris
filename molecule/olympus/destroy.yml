@@ -21,7 +21,7 @@
           - { name: 'instance' }
 
     - debug:
-        var: molecule_yml.platforms[0]
+        var: molecule_yml
 
 
 
