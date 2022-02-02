@@ -13,6 +13,24 @@
     workdir: "{{ lookup('env', 'WORKDIR') }}"
     job_name: "{{ lookup('env', 'JOB_NAME') | default('ansible') }}-slave"
   tasks:
+
+    - debug:
+        msg: "Workdir: {{ workdir }}"
+
+    - set_fact:
+        instance_etc_hosts: "{{ molecule_yml.platforms[0].etc_hosts }}"
+
+    - debug:
+        var: instance_etc_hosts
+
+    - set_fact:
+        platforms: "{{ molecule_yml.platforms }}"
+
+    - set_fact:
+        molecule_yml.platforms:
+          - { name: 'instance' }
+          
+          
     - assert:
         that:
           - hera_molecule_slave_sshd_port is defined
@@ -32,14 +50,6 @@
           - is_workdir.stat.exists
         quiet: true
 
-    - debug:
-        msg: "Workdir: {{ workdir }}"
-
-    - set_fact:
-        instance_etc_hosts: "{{ molecule_yml.platforms[0].etc_hosts }}"
-
-    - debug:
-        var: instance_etc_hosts
 
     - command: >
         bash -x {{ hera_home }}/hera.sh run

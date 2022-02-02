@@ -5,6 +5,9 @@ driver:
   name: delegated
 platforms:
   - name: instance
+    etc_hosts:
+      jbcs-0: '127.0.0.1'
+      wfly-0: '127.0.0.1'
 provisioner:
   name: ansible
 verifier:
