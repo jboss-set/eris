@@ -23,6 +23,10 @@
     - debug:
         var: instance_etc_hosts
 
+    - set_fact:
+        molecule_yml:
+          platforms:
+          - { name: 'instance' }
 
     - assert:
         that:
