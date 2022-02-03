@@ -10,38 +10,36 @@
     workdir: "{{ lookup('env', 'WORKDIR') }}"
     job_name: "{{ lookup('env', 'JOB_NAME') | default('ansible') }}-slave"
   tasks:
-
-
-    - set_fact:
-        platforms: "{{ molecule_yml.platforms }}"
-
-    - set_fact:
-        molecule_yml:
-          platforms:
-          - { name: 'instance' }
-
-    - debug:
-        var: molecule_yml
+#    - set_fact:
+#        platforms: "{{ molecule_yml.platforms }}"
+#
+#    - set_fact:
+#        molecule_yml:
+#          platforms:
+#          - { name: 'instance' }
+    - block:
+      - debug:
+          var: molecule_yml
 
 
 
-    - assert:
-        that:
-          - hera_home is defined
-          - workdir is defined
-        quiet: true
+      - assert:
+          that:
+            - hera_home is defined
+            - workdir is defined
+          quiet: true
 
-    - stat:
-        path: "{{ workdir }}"
-      register: is_workdir
+      - stat:
+          path: "{{ workdir }}"
+        register: is_workdir
 
-    - assert:
-        that:
-          - is_workdir is defined
-          - is_workdir.stat is defined
-          - is_workdir.stat.exists is defined
-          - is_workdir.stat.exists
-        quiet: true
+      - assert:
+          that:
+            - is_workdir is defined
+            - is_workdir.stat is defined
+            - is_workdir.stat.exists is defined
+            - is_workdir.stat.exists
+          quiet: true
 
     - block:
         - command: >

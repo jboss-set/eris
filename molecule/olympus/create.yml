@@ -18,10 +18,17 @@
         msg: "Workdir: {{ workdir }}"
 
     - set_fact:
-        instance_etc_hosts: "{{ molecule_yml.platforms[0].etc_hosts }}"
+        ect_hosts_option: ""
+
+    - set_fact:
+        instance_etc_hosts: "{{ molecule_yml.platforms[0].etc_hosts | dict2items}}"
+
+    - set_fact:
+        ect_hosts_option: "{{ ect_hosts_option }} --add-host={{ item.value }}:{{ item.key }}"
+      loop: "{{ instance_etc_hosts }}"
 
     - debug:
-        var: instance_etc_hosts
+        var: ect_hosts_option
 
     - set_fact:
         molecule_yml:
@@ -64,6 +71,7 @@
         PUBLISHED_PORTS: "{{ hera_molecule_slave_sshd_port }}:22"
         SYSTEMD_ENABLED: True
         CONTAINER_COMMAND: '/usr/sbin/init'
+        EXTRA_DOCKER_OPTS: "{{ ect_hosts_option | omit }}"
 
     - command: >
         bash -x {{ hera_home }}/hera.sh inspect
