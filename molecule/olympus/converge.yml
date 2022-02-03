@@ -1,0 +1,12 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - debug:
+        msg: "molecule_instance_config {{ molecule_instance_config }}"
+
+    - name: Creating a file with content
+      copy:
+        dest: "hello.txt"
+        content: |
+         "hello"
