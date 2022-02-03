@@ -15,6 +15,36 @@
   tasks:
     - debug:
         var: ansible_nodename
+
+    - name: Create directory for ansible custom facts
+      ansible.builtin.file:
+        state: directory
+        recurse: yes
+        path: /etc/ansible/facts.d
+
+    - name: Creating a file with content
+      copy:
+        dest: /etc/ansible/facts.d/hera.fact
+        content: |
+          [hera]
+          "sshd_port:{{ hera_molecule_slave_sshd_port  }}"
+      when:
+        - not hera.sshd_port is defined
+    - set_fact:
+        next_port: "{{ {{ hera_molecule_slave_sshd_port  + 1 }}"
+
+    - name: "Update curent port from {{ hera_molecule_slave_sshd_port  }} to {{ next_port }}."
+      template:
+        src: hera.fact.j2
+        dest: /etc/ansible/facts.d/hera.fact
+
+    - name: Re-read facts after adding custom fact
+      ansible.builtin.setup:
+        filter: ansible_local
+
+    - debug:
+        var: hera.sshd_port
+
     - debug:
         msg: "Workdir: {{ workdir }}"
 
@@ -40,6 +70,7 @@
         that:
           - hera_molecule_slave_sshd_port is defined
           - hera_molecule_slave_sshd_port != 'undefined'
+          - hera.sshd_port is defined
           - workdir is defined
         quiet: true
 
@@ -63,13 +94,13 @@
       register: hera_run
       environment:
         BUILD_PODMAN_IMAGE: "{{ podman_image }}"
-        JOB_NAME: "{{ job_name }}"
+        JOB_NAME: "{{ job_name }}-{{ ansible_nodename }}"
         HERA_HOSTNAME: "olympus"
         HERA_DEBUG: "{{ hera_debug  }}"
         JENKINS_HOME_DIR: "/home/jenkins/current/"
         CONTAINER_UID: '0'
         CONTAINER_USERNAME: 'root'
-        PUBLISHED_PORTS: "{{ hera_molecule_slave_sshd_port }}:22"
+        PUBLISHED_PORTS: "{{ hera.sshd_port }}:22"
         SYSTEMD_ENABLED: True
         CONTAINER_COMMAND: '/usr/sbin/init'
         EXTRA_DOCKER_OPTS: "{{ ect_hosts_option | omit }}"
@@ -89,7 +120,7 @@
 
     - set_fact:
         hera_created_instances:
-          - { address: 'olympus', user: 'root',  port: "{{ hera_molecule_slave_sshd_port }}", identity_file:  '/var/jenkins_home/.ssh/id_rsa' }
+          - { address: 'olympus', user: 'root',  port: "{{ hera.sshd_port }}", identity_file:  '/var/jenkins_home/.ssh/id_rsa' }
 
     - debug:
         msg: "Container created: {{ hera_run.stdout }}"
@@ -109,7 +140,7 @@
         - name: Populate instance config dict
           set_fact:
             instance_conf_dict: {
-              'instance': "instance",
+              'instance': "{{ ansible_nodename }}",
               'address': "{{ item.address }}",
               'user': "{{ item.user }}",
               'port': "{{ item.port }}",
