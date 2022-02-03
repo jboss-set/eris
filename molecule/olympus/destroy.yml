@@ -10,7 +10,10 @@
     workdir: "{{ lookup('env', 'WORKDIR') }}"
     job_name: "{{ lookup('env', 'JOB_NAME') | default('ansible') }}-slave"
   tasks:
-#    - set_fact:
+
+    - debug:
+        var: ansible_nodename
+    #    - set_fact:
 #        platforms: "{{ molecule_yml.platforms }}"
 #
 #    - set_fact:
