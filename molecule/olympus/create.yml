@@ -6,12 +6,15 @@
   no_log: "{{ molecule_no_log }}"
   vars:
     hera_home: "{{ lookup('env', 'HERA_HOME') }}"
-      #hera_debug: "{{ lookup('env', 'HERA_DEBUG') | default(False) }}"
-    hera_debug: True
-    podman_image: 'localhost/molecule-slave'
+    hera_hostname: "{{ lookup('env', 'HERA_HOSTNAME') | default('olympus') }}"
     hera_molecule_slave_sshd_port: "{{ lookup('env', 'BUILD_MOLECULE_SLAVE_SSHD_PORT') | default('undefined') }}"
+    podman_image: "{{ lookup('env', 'MOLECULE_SLAVE_IMAGE') | default('localhost/molecule-slave') }}"
+    podman_container_uid: "{{ lookup('env', 'MOLECULE_SLAVE_CONTAINER_UID') | default('0') }}"
+    podman_container_username: "{{ lookup('env', 'MOLECULE_SLAVE_CONTAINER_USER') | default('root') }}"
+    podman_published_ports: "{{ lookup('env', 'MOLECULE_SLAVE_CONTAINER_PUBLISHED_PORTS') | default('22') }}"
     workdir: "{{ lookup('env', 'WORKDIR') }}"
     job_name: "{{ lookup('env', 'JOB_NAME') | default('ansible') }}-slave"
+    jenkins_home_dir: "{{ lookup('env', 'JENKINS_HOME_DIR') | default('/home/jenkins/current/') }}"
   tasks:
 
     - debug:
@@ -39,9 +42,7 @@
           - is_workdir.stat.exists is defined
           - is_workdir.stat.exists
         quiet: true
-
-    - debug:
-        msg: "Workdir: {{ workdir }}"
+        fail_msg: "Provided 'workdir' does not exist: {{ workdir }}"
 
     - command: >
         bash -x {{ hera_home }}/hera.sh run
@@ -50,16 +51,15 @@
       register: hera_run
       environment:
         BUILD_PODMAN_IMAGE: "{{ podman_image }}"
-        JOB_NAME: "{{ job_name }}"
-        HERA_HOSTNAME: "olympus"
-        HERA_DEBUG: "{{ lookup('env', 'HERA_DEBUG') | default('') }}"
-        JENKINS_HOME_DIR: "/home/jenkins/current/"
-        CONTAINER_UID: '0'
-        CONTAINER_USERNAME: 'root'
-        PUBLISHED_PORTS: "{{ hera_molecule_slave_sshd_port }}:22"
+        JOB_NAME: "{{ job_name }}-{{ ansible_nodename }}"
+        HERA_HOSTNAME: "{{ hera_hostname }}"
+        HERA_DEBUG: "{{ hera_debug  }}"
+        JENKINS_HOME_DIR: "{{ jenkins_home_dir }}"
+        CONTAINER_UID: "{{ podman_container_uid }}"
+        CONTAINER_USERNAME: "{{ podman_container_username }}"
+        PUBLISHED_PORTS: "{{ hera.sshd_port }}:{{ podman_published_ports }}"
         SYSTEMD_ENABLED: True
         CONTAINER_COMMAND: '/usr/sbin/init'
-
 
     - command: >
         bash -x {{ hera_home }}/hera.sh inspect
@@ -69,8 +69,8 @@
       environment:
         BUILD_PODMAN_IMAGE: "{{ podman_image }}"
         JOB_NAME: "{{ job_name }}"
-        HERA_HOSTNAME: "olympus"
-        JENKINS_HOME_DIR: "/home/jenkins/current/"
+        HERA_HOSTNAME: "{{ hera_hostname }}"
+        JENKINS_HOME_DIR: "{{ jenkins_home_dir }}"
       when:
         - hera_debug
 

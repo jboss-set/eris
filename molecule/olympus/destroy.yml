@@ -2,14 +2,19 @@
 - name: Destroy
   hosts: localhost
   connection: local
-  gather_facts: false
-  no_log: False #"{{ molecule_no_log }}"
+  gather_facts: true
+  no_log: "{{ molecule_no_log }}"
   vars:
     hera_home: "{{ lookup('env', 'HERA_HOME') }}"
     hera_debug: "{{ lookup('env', 'HERA_DEBUG') | default(False) }}"
+    hera_hostname: "{{ lookup('env', 'HERA_HOSTNAME') | default('olympus') }}"
     workdir: "{{ lookup('env', 'WORKDIR') }}"
     job_name: "{{ lookup('env', 'JOB_NAME') | default('ansible') }}-slave"
   tasks:
+
+    - debug:
+        msg: "Running on {{ ansible_nodename }} using {{ ansible_version.full }}."
+
     - assert:
         that:
           - hera_home is defined
@@ -27,6 +32,7 @@
           - is_workdir.stat.exists is defined
           - is_workdir.stat.exists
         quiet: true
+        fail_msg: "Provided 'workdir' does not exist: {{ workdir }}"
 
     - block:
         - command: >
@@ -37,8 +43,8 @@
           register: hera_stop
           environment:
             JOB_NAME: "{{ job_name }}"
-            HERA_DEBUG: true
-            HERA_HOSTNAME: "olympus"
+            HERA_DEBUG: "{{ hera_debug }}"
+            HERA_HOSTNAME: "{{ hera_hostname }}"
       rescue:
         - debug:
             msg: "No container to destroy."
