@@ -11,7 +11,8 @@
     hera_debug: "{{ lookup('env', 'HERA_DEBUG') | default('False') }}"
     podman_image: "{{ lookup('env', 'MOLECULE_SLAVE_IMAGE') | default('localhost/molecule-slave') }}"
     podman_container_uid: "{{ lookup('env', 'MOLECULE_SLAVE_CONTAINER_UID') | default('0') }}"
-    podman_container_username: "{{ lookup('env', 'MOLECULE_SLAVE_CONTAINER_USER') | default('root') }}"
+    #podman_container_username: "{{ lookup('env', 'MOLECULE_SLAVE_CONTAINER_USER') | default('root') }}"
+    podman_container_username: 'root'
     podman_published_ports: "22"
     workdir: "{{ lookup('env', 'WORKDIR') }}"
     job_name: "{{ lookup('env', 'JOB_NAME') | default('ansible') }}-slave"
