@@ -26,7 +26,7 @@
           - ansible_version.full is defined
 
     - debug:
-        msg: "{{ job_name }}: running Molecule test suite with podman image {{ podman_image }} using Ansible v{{ ansible_version.full }}. Dedicated SSH port is {{ hera_molecule_slave_sshd_port }} mapped to {{ podman_published_ports }} on container. {{ jenkins_home_dir }}"
+        msg: "{{ job_name }}: running Molecule test suite with podman image {{ podman_image }} using Ansible v{{ ansible_version.full }}. Dedicated SSH port is {{ hera_molecule_slave_sshd_port }} mapped to {{ podman_published_ports }} on container. {{ podman_container_username }}"
 
     - assert:
         that:
