@@ -6,23 +6,27 @@
   no_log: "{{ molecule_no_log }}"
   vars:
     hera_home: "{{ lookup('env', 'HERA_HOME') }}"
-    hera_hostname: "{{ lookup('env', 'HERA_HOSTNAME') | default('olympus') }}"
+    hera_hostname: "{{ lookup('env', 'HERA_HOSTNAME') | default('podman.host') }}"
     hera_molecule_slave_sshd_port: "{{ lookup('env', 'BUILD_MOLECULE_SLAVE_SSHD_PORT') | default('undefined') }}"
+    hera_debug: "{{ lookup('env', 'HERA_DEBUG') | default('False') }}"
     podman_image: "{{ lookup('env', 'MOLECULE_SLAVE_IMAGE') | default('localhost/molecule-slave') }}"
     podman_container_uid: "{{ lookup('env', 'MOLECULE_SLAVE_CONTAINER_UID') | default('0') }}"
     podman_container_username: "{{ lookup('env', 'MOLECULE_SLAVE_CONTAINER_USER') | default('root') }}"
-    podman_published_ports: "{{ lookup('env', 'MOLECULE_SLAVE_CONTAINER_PUBLISHED_PORTS') | default('22') }}"
+    podman_published_ports: "22"
     workdir: "{{ lookup('env', 'WORKDIR') }}"
     job_name: "{{ lookup('env', 'JOB_NAME') | default('ansible') }}-slave"
-    jenkins_home_dir: "{{ lookup('env', 'JENKINS_HOME_DIR') | default('/home/jenkins/current/') }}"
+    #jenkins_home_dir: "{{ lookup('env', 'JENKINS_HOME_DIR') | default('/home/jenkins/current/') }}"
+    jenkins_home_dir: '/home/jenkins/current/'
   tasks:
+    - assert:
+        that:
+          - job_name is defined
+          - podman_image is defined
+          - ansible_version is defined
+          - ansible_version.full is defined
 
     - debug:
-        msg: "Running on {{ ansible_nodename }} using Ansible v{{ ansible_version.full }}."
-      when:
-        - ansible_nodename is defined
-        - ansible_version is defined
-        - ansible_version.full is defined
+        msg: "{{ job_name }}: running Molecule test suite with podman image {{ podman_image }} using Ansible v{{ ansible_version.full }}. Dedicated SSH port is {{ hera_molecule_slave_sshd_port }} mapped to {{ podman_published_ports }} on container. {{ jenkins_home_dir }}"
 
     - assert:
         that:
@@ -57,7 +61,7 @@
         JENKINS_HOME_DIR: "{{ jenkins_home_dir }}"
         CONTAINER_UID: "{{ podman_container_uid }}"
         CONTAINER_USERNAME: "{{ podman_container_username }}"
-        PUBLISHED_PORTS: "{{ hera.sshd_port }}:{{ podman_published_ports }}"
+        PUBLISHED_PORTS: "{{ hera_molecule_slave_sshd_port }}:{{ podman_published_ports }}"
         SYSTEMD_ENABLED: True
         CONTAINER_COMMAND: '/usr/sbin/init'
 
@@ -76,7 +80,7 @@
 
     - set_fact:
         hera_created_instances:
-          - { address: 'olympus', user: 'root',  port: "{{ hera_molecule_slave_sshd_port }}", identity_file:  '/var/jenkins_home/.ssh/id_rsa' }
+          - { address: 'podman.host', user: 'root',  port: "{{ hera_molecule_slave_sshd_port }}", identity_file:  '/var/jenkins_home/.ssh/id_rsa' }
 
     - debug:
         msg: "Container created: {{ hera_run.stdout }}"
