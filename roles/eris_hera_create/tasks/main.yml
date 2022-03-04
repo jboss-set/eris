@@ -16,25 +16,14 @@
   ansible.builtin.debug:
     msg: "{{ job_name }}: running Molecule test suite with podman image {{ podman_image }} using Ansible v{{ ansible_version.full }}. Dedicated SSH port is {{ hera_molecule_slave_sshd_port }} mapped to 22 on container."
 
-- name: "Read HERA_HOME ({{ hera_home }} information"
-  ansible.builtin.stat:
-    path: "{{ hera_home }}"
-  register: is_workdir
-
-- name: "Ensure {{ hera_home }} exits."
-  ansible.builtin.assert:
-    that:
-      - is_workdir is defined
-      - is_workdir.stat is defined
-      - is_workdir.stat.exists is defined
-      - is_workdir.stat.exists
-    quiet: true
-
-- name: "Display HERA_HOME"
-  ansible.builtin.debug:
-    msg: "Workdir: {{ workdir }}"
-  when:
-    - hera_debug
+- name: "Check that workdir and HERA_HOME exists."
+  ansible.builtin.include_tasks: check_dir.yml
+  vars:
+    variable_name: "{{ item.variable_name }}"
+    directory_path: "{{ item.directory_path }}"
+  loop:
+    - { variable_name: 'HERA_HOME', directory_path: "{{ hera_home }}" }
+    - { variable_name: 'workdir', directory_path: "{{ workdir }}" }
 
 - name: "HERA: run"
   ansible.builtin.command: >

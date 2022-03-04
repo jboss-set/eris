@@ -1,0 +1,5 @@
+---
+hera_home: "{{ lookup('env', 'HERA_HOME') }}"
+hera_debug: "{{ lookup('env', 'HERA_DEBUG') | default(False) }}"
+workdir: "{{ lookup('env', 'WORKDIR') }}"
+job_name: "{{ lookup('env', 'JOB_NAME') | default('ansible') }}-slave"

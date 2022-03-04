@@ -1,0 +1,29 @@
+---
+- name: "Ensures required parameters are provided."
+  ansible.builtin.assert:
+    that:
+      - variable_name is defined
+      - directory_path is defined
+    quiet: true
+    fail_msg: "Missing required parameter"
+
+- name: "Display {{ variable_name }}"
+  ansible.builtin.debug:
+    msg: "{{ variable_name }}: {{ directory_path }} "
+  when:
+    - hera_debug
+
+- name: "Read {{ variable_name }} ({{ directory_path }} information"
+  ansible.builtin.stat:
+    path: "{{ directory_path }}"
+  register: is_dir
+
+- name: "Ensure {{ directory_path }} exists."
+  ansible.builtin.assert:
+    that:
+      - is_dir is defined
+      - is_dir.stat is defined
+      - is_dir.stat.exists is defined
+      - is_dir.stat.exists
+    quiet: true
+    fail_msg: "{{ variable_name }} does not point to an existing directory: {{ directory_path }}"
