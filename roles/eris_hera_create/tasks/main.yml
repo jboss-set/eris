@@ -1,26 +1,28 @@
 ---
-- assert:
+- name: "Ensure necessary parameters are defined."
+  ansible.builtin.assert:
     that:
       - job_name is defined
       - podman_image is defined
       - ansible_version is defined
       - ansible_version.full is defined
-
-- debug:
-    msg: "{{ job_name }}: running Molecule test suite with podman image {{ podman_image }} using Ansible v{{ ansible_version.full }}. Dedicated SSH port is {{ hera_molecule_slave_sshd_port }} mapped to 22 on container."
-
-- assert:
-    that:
       - hera_molecule_slave_sshd_port is defined
       - hera_molecule_slave_sshd_port != 'undefined'
       - workdir is defined
     quiet: true
+    fail_msg: "Missing required parameters"
 
-- stat:
+- name: "Display driver infos"
+  ansible.builtin.debug:
+    msg: "{{ job_name }}: running Molecule test suite with podman image {{ podman_image }} using Ansible v{{ ansible_version.full }}. Dedicated SSH port is {{ hera_molecule_slave_sshd_port }} mapped to 22 on container."
+
+- name: "Read HERA_HOME ({{ hera_home }} information"
+  ansible.builtin.stat:
     path: "{{ hera_home }}"
   register: is_workdir
 
-- assert:
+- name: "Ensure {{ hera_home }} exits."
+  ansible.builtin.assert:
     that:
       - is_workdir is defined
       - is_workdir.stat is defined
@@ -28,10 +30,14 @@
       - is_workdir.stat.exists
     quiet: true
 
-- debug:
+- name: "Display HERA_HOME"
+  ansible.builtin.debug:
     msg: "Workdir: {{ workdir }}"
+  when:
+    - hera_debug
 
-- command: >
+- name: "HERA: run"
+  ansible.builtin.command: >
     bash -x {{ hera_home }}/hera.sh run
   args:
     chdir: "{{ workdir }}"
@@ -48,7 +54,8 @@
     SYSTEMD_ENABLED: True
     CONTAINER_COMMAND: '/usr/sbin/init'
 
-- command: >
+- name: "HERA: inspect"
+  ansible.builtin.command: >
     bash -x {{ hera_home }}/hera.sh inspect
   args:
     chdir: "{{ workdir }}"
@@ -61,27 +68,28 @@
   when:
     - hera_debug
 
-- set_fact:
+- name: "Set hera_created_instances"
+  ansible.builtin.set_fact:
     hera_created_instances:
       - { address: 'olympus', user: 'root',  port: "{{ hera_molecule_slave_sshd_port }}", identity_file:  '/var/jenkins_home/.ssh/id_rsa' }
 
-- debug:
+- name: "Display hera run stdout"
+  ansible.builtin.debug:
     msg: "Container created: {{ hera_run.stdout }}"
   when:
     - hera_debug
 
-- when: True #server.changed | default(false) | bool
+- when: True
   block:
 
-    - name: Ensure hera_created_instances is defined"
-      assert:
+    - name: "Ensure hera_created_instances is defined"
+      ansible.builtin.assert:
         that:
           - hera_created_instances is defined
-            #   - hera_created_instances | length > 0
         quiet: true
 
     - name: Populate instance config dict
-      set_fact:
+      ansible.builtin.set_fact:
         instance_conf_dict: {
           'instance': "instance",
           'address': "{{ item.address }}",
@@ -91,22 +99,27 @@
       with_items: "{{ hera_created_instances  }}"
       register: instance_config_dict
 
-    - debug:
+    - name: "Display molecule instance config"
+      ansible.builtin.debug:
         msg: "Create phase with {{ molecule_instance_config }}"
+      when:
+        - hera_debug
 
-    - name: Convert instance config dict to a list
-      set_fact:
+    - name: "Convert instance config dict to a list"
+      ansible.builtin.set_fact:
         instance_conf: "{{ instance_config_dict.results | map(attribute='ansible_facts.instance_conf_dict') | list }}"
 
-    - name: Dump instance config
-      copy:
+    - name: "Dump instance config"
+      ansible.builtin.copy:
         content: |
           {{ instance_conf | to_json | from_json | to_yaml }}
         dest: "{{ molecule_instance_config }}"
 
-    - slurp:
+    - name: "Slurp {{ molecule_instance_config }}"
+      ansible.builtin.slurp:
         src: "{{ molecule_instance_config }}"
       register: res_conf
 
-    - debug:
+    - name: "Display content of {{ molecule_instance_config }}"
+      ansible.builtin.debug:
         msg: "{{ res_conf['content'] | b64decode }}"
