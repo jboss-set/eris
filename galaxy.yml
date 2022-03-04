@@ -1,0 +1,10 @@
+namespace: middleware_automation
+name: eris
+version: "0.0.1"
+readme: README.md
+authors:
+  - Romain Pelisse <belaran@redhat.com>
+description: A molecule driver designed to integrate with Hera
+license_file: "LICENSE"
+tags:
+  - molecule

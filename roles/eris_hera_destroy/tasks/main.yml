@@ -1,0 +1,45 @@
+---
+- assert:
+    that:
+      - hera_home is defined
+      - workdir is defined
+    quiet: true
+
+- include_tasks: ensure_dir_exists.yml
+  loop:
+    - { path: "{{ workdir }}", msg: "WORKDIR env variable must be defined and refers to an existing directory" }
+    - { path: "{{ hera_home }}", msg: "HERA_HOME must be set and point to Hera's home directory." }
+
+- block:
+    - command: >
+        bash -x {{ hera_home }}/hera.sh stop
+      args:
+        chdir: "{{ workdir }}"
+      no_log: False
+      register: hera_stop
+      environment:
+        JOB_NAME: "{{ job_name }}"
+        HERA_DEBUG: true
+        HERA_HOSTNAME: "olympus"
+  rescue:
+    - debug:
+        msg: "No container to destroy."
+
+- debug:
+    msg: "{{ hera_stop }}"
+  when:
+    - hera_debug
+
+# Mandatory configuration for Molecule to function.
+- name: Populate instance config
+  set_fact:
+    instance_conf: {}
+
+- name: Dump instance config
+  copy:
+    content: |
+      # Molecule managed
+
+      {{ instance_conf | to_json | from_json | to_yaml }}
+    dest: "{{ molecule_instance_config }}"
+  when: server.changed | default(false) | bool
