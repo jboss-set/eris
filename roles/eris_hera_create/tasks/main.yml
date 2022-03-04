@@ -17,7 +17,9 @@
     msg: "{{ job_name }}: running Molecule test suite with podman image {{ podman_image }} using Ansible v{{ ansible_version.full }}. Dedicated SSH port is {{ hera_molecule_slave_sshd_port }} mapped to 22 on container."
 
 - name: "Check that workdir and HERA_HOME exists."
-  ansible.builtin.include_tasks: check_dir.yml
+  ansible.builtin.include_role:
+    name: eris_hera_commons
+    tasks_from: check_dir.yml
   vars:
     variable_name: "{{ item.variable_name }}"
     directory_path: "{{ item.directory_path }}"
