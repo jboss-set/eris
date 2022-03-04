@@ -4,14 +4,6 @@
   connection: local
   gather_facts: true
   no_log: "{{ molecule_no_log }}"
-  vars:
-    hera_home: "{{ lookup('env', 'HERA_HOME') }}"
-      #hera_debug: "{{ lookup('env', 'HERA_DEBUG') | default(False) }}"
-    hera_debug: True
-    podman_image: 'localhost/molecule-slave'
-    hera_molecule_slave_sshd_port: "{{ lookup('env', 'BUILD_MOLECULE_SLAVE_SSHD_PORT') | default('undefined') }}"
-    workdir: "{{ lookup('env', 'WORKDIR') }}"
-    job_name: "{{ lookup('env', 'JOB_NAME') | default('ansible') }}-slave"
   collections:
     - middleware_automation.eris
   roles:
