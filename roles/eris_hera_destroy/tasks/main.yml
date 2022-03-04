@@ -1,17 +1,26 @@
 ---
-- assert:
+- name: "Ensure required parameters are provided."
+  ansible.builtin.assert:
     that:
       - hera_home is defined
       - workdir is defined
     quiet: true
+    fail_msg: "Missing required parameters"
 
-- include_tasks: ensure_dir_exists.yml
+- name: "Check that workdir and HERA_HOME exists."
+  ansible.builtin.include_role:
+    name: eris_hera_commons
+    tasks_from: check_dir.yml
+  vars:
+    variable_name: "{{ item.variable_name }}"
+    directory_path: "{{ item.directory_path }}"
   loop:
-    - { path: "{{ workdir }}", msg: "WORKDIR env variable must be defined and refers to an existing directory" }
-    - { path: "{{ hera_home }}", msg: "HERA_HOME must be set and point to Hera's home directory." }
+    - { variable_name: 'HERA_HOME', directory_path: "{{ hera_home }}" }
+    - { variable_name: 'workdir', directory_path: "{{ workdir }}" }
 
 - block:
-    - command: >
+    - name: "HERA: stop"
+      ansible.builtin.command: >
         bash -x {{ hera_home }}/hera.sh stop
       args:
         chdir: "{{ workdir }}"
@@ -22,21 +31,23 @@
         HERA_DEBUG: true
         HERA_HOSTNAME: "olympus"
   rescue:
-    - debug:
+    - name: "HERA: stop failed."
+      ansible.builtin.debug:
         msg: "No container to destroy."
 
-- debug:
+- name: "Display result of HERA stop operation"
+  ansible.builtin.debug:
     msg: "{{ hera_stop }}"
   when:
     - hera_debug
 
 # Mandatory configuration for Molecule to function.
 - name: Populate instance config
-  set_fact:
+  ansible.builtin.set_fact:
     instance_conf: {}
 
 - name: Dump instance config
-  copy:
+  ansible.builtin.copy:
     content: |
       # Molecule managed
 
