@@ -44,6 +44,7 @@
     PUBLISHED_PORTS: "{{ hera_molecule_slave_sshd_port }}:22"
     SYSTEMD_ENABLED: True
     CONTAINER_COMMAND: '/usr/sbin/init'
+  changed_when: True
 
 - name: "HERA: inspect"
   ansible.builtin.command: >
@@ -105,6 +106,7 @@
         content: |
           {{ instance_conf | to_json | from_json | to_yaml }}
         dest: "{{ molecule_instance_config }}"
+        mode: '0644'
 
     - name: "Slurp {{ molecule_instance_config }}"
       ansible.builtin.slurp:
