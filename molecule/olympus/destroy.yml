@@ -6,6 +6,6 @@
   no_log: "{{ molecule_no_log }}"
   collections:
     - middleware_automation.eris
-  roles:
-    - eris_hera_destroy
   tasks:
+    - ansible.builtin.include_role:
+        name: eris_hera_destroy
