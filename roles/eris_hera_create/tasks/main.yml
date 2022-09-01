@@ -116,3 +116,11 @@
     - name: "Display content of {{ molecule_instance_config }}"
       ansible.builtin.debug:
         msg: "{{ res_conf['content'] | b64decode }}"
+
+    - name: "Wait for {{ wait_for_sshd }}s"
+      ansible.builtin.wait_for:
+        port: "{{ hera_molecule_slave_sshd_port }}"
+        host: 'olympus'
+        search_regex: OpenSSH
+        delay: "{{ wait_for_sshd }}"
+      delegate_to: localhost
