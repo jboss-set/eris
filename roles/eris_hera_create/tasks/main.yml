@@ -38,7 +38,7 @@
     JOB_NAME: "{{ job_name }}"
     HERA_HOSTNAME: "olympus"
     HERA_DEBUG: "{{ lookup('env', 'HERA_DEBUG') | default('') }}"
-    JENKINS_HOME_DIR: "{{ lookup('env', 'JENKINS_HOME_DIR') | default('/home/jenkins') }}"
+    JENKINS_HOME_DIR: "/home/jenkins/next"
     CONTAINER_UID: '0'
     CONTAINER_USERNAME: 'root'
     PUBLISHED_PORTS: "{{ hera_molecule_slave_sshd_port }}:22"
@@ -56,7 +56,7 @@
     BUILD_PODMAN_IMAGE: "{{ podman_image }}"
     JOB_NAME: "{{ job_name }}"
     HERA_HOSTNAME: "olympus"
-    JENKINS_HOME_DIR: "{{ lookup('env', 'JENKINS_HOME_DIR') | default('/home/jenkins') }}"
+    JENKINS_HOME_DIR: "/home/jenkins/next"
   when:
     - hera_debug
 
