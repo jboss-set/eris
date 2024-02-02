@@ -5,4 +5,4 @@ podman_image: 'localhost/molecule-slave'
 hera_molecule_slave_sshd_port: "{{ lookup('env', 'BUILD_MOLECULE_SLAVE_SSHD_PORT') | default('undefined') }}"
 workdir: "{{ lookup('env', 'WORKDIR') }}"
 job_name: "{{ lookup('env', 'JOB_NAME') | default('ansible') }}-slave"
-wait_for_sshd: "{{ lookup('env', 'ERIS_SSHD_WAIT_TIMEOUT') | default(60) | int }}"
+wait_for_sshd: "{{ lookup('env', 'ERIS_SSHD_WAIT_TIMEOUT') | default(60) }}"
