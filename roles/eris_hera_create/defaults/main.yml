@@ -1,7 +1,7 @@
 ---
 hera_home: "{{ lookup('env', 'HERA_HOME') }}"
 hera_debug: "{{ lookup('env', 'HERA_DEBUG') | default(False) }}"
-podman_image: 'localhost/molecule-slave'
+podman_image: 'localhost/molecule-slave-fixed'
 hera_molecule_slave_sshd_port: "{{ lookup('env', 'BUILD_MOLECULE_SLAVE_SSHD_PORT') | default('undefined') }}"
 workdir: "{{ lookup('env', 'WORKDIR') }}"
 job_name: "{{ lookup('env', 'JOB_NAME') | default('ansible') }}-slave"
