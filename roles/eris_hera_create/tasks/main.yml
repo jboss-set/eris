@@ -121,4 +121,6 @@
       ansible.builtin.wait_for:
         port: "{{ hera_molecule_slave_sshd_port }}"
         delay: "{{ wait_for_sshd }}"
+        connect_timeout: 120
+        timeout: 600
       delegate_to: localhost
