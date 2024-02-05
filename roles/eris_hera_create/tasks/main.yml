@@ -119,5 +119,5 @@
 
     - name: "Wait for {{ wait_for_sshd }}s"
       ansible.builtin.wait_for:
-        timeout: 30
+        timeout: "{{ wait_for_sshd }}"
       delegate_to: localhost
