@@ -121,4 +121,5 @@
       ansible.builtin.wait_for_connection:
         timeout: "{{ wait_for_sshd }}"
         delay: 15
+        sleep: 5
       delegate_to: olympus
