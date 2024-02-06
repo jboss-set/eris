@@ -120,4 +120,5 @@
     - name: "Wait {{ wait_for_sshd }} seconds for target connection to become reachable/usable"
       ansible.builtin.wait_for_connection:
         timeout: "{{ wait_for_sshd }}"
+        delays: 15
       delegate_to: olympus
