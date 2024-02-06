@@ -117,7 +117,7 @@
       ansible.builtin.debug:
         msg: "{{ res_conf['content'] | b64decode }}"
 
-    - name: "Wait for {{ wait_for_sshd }}s"
-      ansible.builtin.wait_for:
+    - name: "Wait {{ wait_for_sshd }} seconds for target connection to become reachable/usable"
+      ansible.builtin.wait_for_connection:
         timeout: "{{ wait_for_sshd }}"
-      delegate_to: localhost
+      delegate_to: olympus
