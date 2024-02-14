@@ -63,7 +63,7 @@
 - name: "Set hera_created_instances"
   ansible.builtin.set_fact:
     hera_created_instances:
-      - { address: 'olympus', user: 'root',  port: "{{ hera_molecule_slave_sshd_port }}", identity_file:  '/var/jenkins_home/.ssh/id_rsa' }
+      - { address: 'olympus', user: "{{ hera_ssh_username }}",  port: "{{ hera_molecule_slave_sshd_port }}", identity_file:  '/var/jenkins_home/.ssh/id_rsa' }
 
 - name: "Display hera run stdout"
   ansible.builtin.debug:
